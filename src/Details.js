@@ -1,10 +1,12 @@
 import { Component } from "react";
 import { withRouter } from "react-router-dom";
 import Carousel from "./Carousel";
+import ThemeContext from "./ThemeContext";
 import ErrorBoundary from "./ErrorBoundary";
+import Modal from "./Modal";
 
 class Details extends Component {
-  state = { loading: true };
+  state = { loading: true, showModal: false };
   // npm i -D @babel/plugin-proposal-class-properties@7.13.0 @babel/preset-env@7.13.5 @babel/eslint-parser@7.13.4
 
   async componentDidMount() {
@@ -22,20 +24,63 @@ class Details extends Component {
     );
   }
 
+  toggleModal = () => {
+    this.setState({ showModal: !this.state.showModal });
+  };
+  adopt = () => (window.location = "http://bit.ly/pet-adopt");
+
   render() {
     if (this.state.loading) {
       return <h2>loading...</h2>;
     }
-    const { animal, breed, city, state, description, name, images } =
+    const { animal, breed, city, state, description, name, images, showModal } =
       this.state;
+
     return (
       <div className="details">
         <Carousel images={images} />
         <div>
           <h1>{name}</h1>
           <h2>{`${animal} - ${breed} - ${city}, ${state}`}</h2>
-          <button>Adopt {name}</button>
+
+          <ThemeContext.Consumer>
+            {([theme]) => (
+              <button
+                onClick={this.toggleModal}
+                style={{ backgroundColor: theme }}
+              >
+                Adopt {name}
+              </button>
+            )}
+          </ThemeContext.Consumer>
           <p>{description}</p>
+          {showModal ? (
+            <Modal>
+              <div>
+                <h1> Would you like to adopt {name}?</h1>
+                <div className="buttons">
+                  <ThemeContext.Consumer>
+                    {([theme]) => (
+                      <>
+                        <button
+                          style={{ backgroundColor: theme }}
+                          onClick={this.adopt}
+                        >
+                          Yes
+                        </button>
+                        <button
+                          style={{ backgroundColor: theme }}
+                          onClick={this.toggleModal}
+                        >
+                          No
+                        </button>
+                      </>
+                    )}
+                  </ThemeContext.Consumer>
+                </div>
+              </div>
+            </Modal>
+          ) : null}
         </div>
       </div>
     );
